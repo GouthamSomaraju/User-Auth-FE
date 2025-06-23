@@ -11,17 +11,23 @@ export const AppContextProvider = (props) => {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(false);
 
-  const getAuthState = async () => {
+  let getAuthState = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/auth/is-auth`, {
         withCredentials: true,
       });
+
       if (data.success) {
         setIsLoggedin(true);
         getUserdata();
       }
     } catch (error) {
-      toast.error(error.message);
+      if (error.response && error.response.status === 401) {
+       
+        setIsLoggedin(false);
+      } else {
+        toast.error("Something went wrong: " + error.message);
+      }
     }
   };
 
@@ -50,8 +56,6 @@ export const AppContextProvider = (props) => {
   };
 
   return (
-    <AppContent.Provider value={value}>
-      {props.children}
-    </AppContent.Provider>
+    <AppContent.Provider value={value}>{props.children}</AppContent.Provider>
   );
 };
