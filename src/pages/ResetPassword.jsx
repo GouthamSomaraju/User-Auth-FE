@@ -13,9 +13,9 @@ const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isOtpSubmitted, setIsOtpSubmitted] = useState(false);
+  const [otp, setOtp] = useState("");
   const inputRefs = useRef([]);
 
-  // Handle individual OTP input
   const handleInput = (e, index) => {
     if (e.target.value.length > 0 && index < inputRefs.current.length - 1) {
       inputRefs.current[index + 1].focus();
@@ -29,9 +29,8 @@ const ResetPassword = () => {
   };
 
   const handlePaste = (e) => {
-    const paste = e.clipboardData.getData("text");
-    const pasteArray = paste.split("");
-    pasteArray.forEach((char, index) => {
+    const paste = e.clipboardData.getData("text").split("");
+    paste.forEach((char, index) => {
       if (inputRefs.current[index]) {
         inputRefs.current[index].value = char;
       }
@@ -41,7 +40,7 @@ const ResetPassword = () => {
   const onSubmitEmail = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post(`${backendUrl}/api/auth/send-reset-otp`, { email });
+      const { data } = await axios.post(`${backendUrl}/api/auth/send-reset-otp`, { email }, { withCredentials: true });
       data.success ? toast.success(data.message) : toast.error(data.message);
       if (data.success) setIsEmailSent(true);
     } catch (error) {
@@ -49,21 +48,17 @@ const ResetPassword = () => {
     }
   };
 
-  const onSubmitOtp = async (e) => {
+  const onSubmitOtp = (e) => {
     e.preventDefault();
-    const otpArray = inputRefs.current.map((input) => input.value.trim());
+    const otpArray = inputRefs.current.map((el) => el.value.trim());
     if (otpArray.some((digit) => digit === "")) {
-      toast.error("Please enter the complete 6-digit OTP");
+      toast.error("Enter all 6 digits");
       return;
     }
     const joinedOtp = otpArray.join("");
-    setIsOtpSubmitted(true);
-    // Note: You can verify OTP here with a separate endpoint if you implement that.
-    // For now, we proceed to reset password screen.
     setOtp(joinedOtp);
+    setIsOtpSubmitted(true);
   };
-
-  const [otp, setOtp] = useState(""); // kept here to use in final password reset
 
   const onSubmitNewPassword = async (e) => {
     e.preventDefault();
@@ -89,7 +84,6 @@ const ResetPassword = () => {
         className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"
       />
 
-      {/* Enter email */}
       {!isEmailSent && (
         <form onSubmit={onSubmitEmail} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
           <h1 className="text-white text-2xl font-semibold text-center mb-4">Reset Password</h1>
@@ -111,7 +105,6 @@ const ResetPassword = () => {
         </form>
       )}
 
-      {/* Enter OTP */}
       {isEmailSent && !isOtpSubmitted && (
         <form onSubmit={onSubmitOtp} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
           <h1 className="text-white text-2xl font-semibold text-center mb-4">Enter OTP</h1>
@@ -138,11 +131,10 @@ const ResetPassword = () => {
         </form>
       )}
 
-      {/* New Password */}
-      {isOtpSubmitted && isEmailSent && (
+      {isOtpSubmitted && (
         <form onSubmit={onSubmitNewPassword} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
           <h1 className="text-white text-2xl font-semibold text-center mb-4">New Password</h1>
-          <p className="text-center mb-6 text-indigo-300">Enter a new password below</p>
+          <p className="text-center mb-6 text-indigo-300">Enter a new password</p>
           <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
             <img src={assets.lock_icon} alt="Lock Icon" />
             <input
