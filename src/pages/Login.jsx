@@ -23,7 +23,7 @@ const Login = () => {
 
       if(state==='Sign Up'){
 
-        let {data}=await axios.post(backendUrl+'/api/auth/register',{name, email, password})
+        let {data}=await axios.post(backendUrl+'/api/auth/register',{name, email, password},{ withCredentials: true })
 
         if(data.success){
           setIsLoggedin(true)
@@ -33,7 +33,7 @@ const Login = () => {
           toast.error(data.message)
         }
       }else{
-        let {data}=await axios.post(backendUrl+'/api/auth/login',{email, password})
+        let {data}=await axios.post(backendUrl+'/api/auth/login',{email, password},{ withCredentials: true })
 
         if(data.success){
           setIsLoggedin(true)
